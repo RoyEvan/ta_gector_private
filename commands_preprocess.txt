@@ -1,0 +1,32 @@
+python utils\finetuning\oversample_by_m2.py --in_m2 datasets\fce_test_bea19.m2 --out_m2 datasets\fce_test_source_bea19.m2 --k_target 2 --k_other 1 --seed 13
+
+python utils\finetuning\convert_m2_to_sentence.py
+
+python utils/preprocess_data.py -s datasets\fce_train_source_bea19_os.txt -t datasets\fce_train_target_bea19_os.txt -o datasets\fce_train_train_bea19_os.txt
+
+
+python train.py --train_set datasets\fce_train_train_bea19_os.txt --dev_set datasets\fce_dev_train_bea19_os.txt --model_dir models\finetuned --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models --pretrain roberta_1_gectorv2 --tune_bert 1 --lr 1e-5 --batch_size 32 --n_epoch 3 --patience 2 --max_len 64 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
+
+=============================================================================
+
+python utils\finetuning\oversample_by_m2_v2.py --in_m2 datasets\fce_dev_bea19.m2 --out_m2 datasets\fce_dev_bea19_os.m2 --k_verb_tense 4 --k_word_order 5 --k_m_prep 3 --k_r_det 3 --k_r_prep 2 --k_noun_num 2 --k_u_prep 2 --k_m_det 2 --k_verb_sva 2 --k_other 1
+python utils\finetuning\convert_m2_to_sentence.py --m2_path datasets\fce_dev_bea19_os.m2 --out_src datasets\fce_dev_source_bea19_os.txt --out_tgt datasets\fce_dev_target_bea19_os.txt 
+python utils\preprocess_data.py -s datasets\fce_dev_source_bea19_os.txt -t datasets\fce_dev_target_bea19_os.txt -o datasets\fce_dev_train_bea19_os.txt
+
+python utils\finetuning\oversample_by_m2_v2.py --in_m2 datasets\fce_test_bea19.m2 --out_m2 datasets\fce_test_bea19_os.m2 --k_verb_tense 4 --k_word_order 5 --k_m_prep 3 --k_r_det 3 --k_r_prep 2 --k_noun_num 2 --k_u_prep 2 --k_m_det 2 --k_verb_sva 2 --k_other 1
+python utils\finetuning\convert_m2_to_sentence.py --m2_path datasets\fce_test_bea19_os.m2 --out_src datasets\fce_test_source_bea19_os.txt --out_tgt datasets\fce_test_target_bea19_os.txt 
+python utils\preprocess_data.py -s datasets\fce_test_source_bea19_os.txt -t datasets\fce_test_target_bea19_os.txt -o datasets\fce_test_train_bea19_os.txt
+
+python utils\finetuning\oversample_by_m2_v2.py --in_m2 datasets\fce_train_bea19.m2 --out_m2 datasets\fce_train_bea19_os.m2 --k_verb_tense 4 --k_word_order 5 --k_m_prep 3 --k_r_det 3 --k_r_prep 2 --k_noun_num 2 --k_u_prep 2 --k_m_det 2 --k_verb_sva 2 --k_other 1
+python utils\finetuning\convert_m2_to_sentence.py --m2_path datasets\fce_train_bea19_os.m2 --out_src datasets\fce_train_source_bea19_os.txt --out_tgt datasets\fce_train_target_bea19_os.txt 
+python utils\preprocess_data.py -s datasets\fce_train_source_bea19_os.txt -t datasets\fce_train_target_bea19_os.txt -o datasets\fce_train_train_bea19_os.txt
+
+
+==========================================
+python train.py --train_set datasets\fce_train_train_bea19_os.txt --dev_set datasets\fce_dev_train_bea19_os.txt --model_dir models\finetuned_v2 --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models --pretrain roberta_1_gectorv2 --tune_bert 1 --lr 5e-6 --batch_size 32 --accumulation_size 2 --n_epoch 5 --patience 2 --max_len 64 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1 --label_smoothing 0.1 --predictor_dropout 0.1 --cold_steps_count 1 --cold_lr 1e-4
+
+===================== V3 =====================
+python train.py --train_set datasets\fce_train_train_bea19_os.txt --dev_set datasets\fce_dev_train_bea19_os.txt --model_dir models\finetuned_v3 --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models --pretrain roberta_1_gectorv2 --tune_bert 1 --lr 1e-5 --batch_size 32 --n_epoch 3 --patience 2 --max_len 64 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
+
+===================== V4 =====================
+python train.py --train_set datasets\fce_train_train_bea19_os.txt --dev_set datasets\fce_dev_train_bea19_os.txt --model_dir models\finetuned_v4 --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models --pretrain roberta_1_gectorv2 --tune_bert 1 --lr 1e-5 --batch_size 32 --n_epoch 3 --patience 2 --max_len 64 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
