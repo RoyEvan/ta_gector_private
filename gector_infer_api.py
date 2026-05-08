@@ -3,11 +3,29 @@ from pydantic import BaseModel
 import spacy
 from typing import List
 from gector.gec_model import GecBERTModel
+from google.cloud import storage
+import os
 
 app = FastAPI()
 
-MODEL_PATH = r"models/baseline_mix_refined/model.th"
-VOCAB_PATH = r"data/output_vocabulary"
+def download_model():
+  bucket_name = "gector-api-docker-image"
+  source_blob_name = "gector-model/model.th"
+  destination_dir = "/tmp/models/baseline_mix_refined"
+  destination_file_name = os.path.join(destination_dir, "model.th")
+
+  os.makedirs(destination_dir, exist_ok=True)
+
+  client = storage.Client()
+  bucket = client.bucket(bucket_name)
+  blob = bucket.blob(source_blob_name)
+
+  blob.download_to_filename(destination_file_name)
+
+  return destination_file_name
+
+MODEL_PATH = download_model()
+VOCAB_PATH = r"models/baseline_mix_refined/vocabulary"
 
 MAX_LEN = 30
 MIN_LEN = 3
@@ -94,19 +112,6 @@ def convert_active_to_passive(doc):
   
   return None
 
-def download_model():
-  bucket_name = "gector-api-docker-image"
-  source_blob_name = "/model.th"
-  destination_file_name = "/tmp/model.th"
-
-  client = storage.Client()
-  bucket = client.bucket(bucket_name)
-  blob = bucket.blob(source_blob_name)
-
-  blob.download_to_filename(destination_file_name)
-
-  print("Model downloaded to", destination_file_name)
-  return destination_file_name
 
 @app.post("/infer")
 def infer(req: Req):
