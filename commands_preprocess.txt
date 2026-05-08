@@ -28,5 +28,90 @@ python train.py --train_set datasets\fce_train_train_bea19_os.txt --dev_set data
 ===================== V3 =====================
 python train.py --train_set datasets\fce_train_train_bea19_os.txt --dev_set datasets\fce_dev_train_bea19_os.txt --model_dir models\finetuned_v3 --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models --pretrain roberta_1_gectorv2 --tune_bert 1 --lr 1e-5 --batch_size 32 --n_epoch 3 --patience 2 --max_len 64 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
 
+
+
 ===================== V4 =====================
 python train.py --train_set datasets\fce_train_train_bea19_os.txt --dev_set datasets\fce_dev_train_bea19_os.txt --model_dir models\finetuned_v4 --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models --pretrain roberta_1_gectorv2 --tune_bert 1 --lr 1e-5 --batch_size 32 --n_epoch 3 --patience 2 --max_len 64 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
+
+===================== V4 + agentlans dataset (Without Oversampling) =====================
+python utils\preprocess_data.py -s datasets\agentlans\train_input_hface.txt -t datasets\agentlans\train_output_hface.txt -o datasets\agentlans\train_preprocessed.txt
+python utils\preprocess_data.py -s datasets\agentlans\val_input_hface.txt -t datasets\agentlans\val_output_hface.txt -o datasets\agentlans\val_preprocessed.txt
+
+===================== 70% FCE (oversampled) + 30% agentlans dataset (not oversampled) =====================
+python train.py --train_set datasets\mix_datasets\mix_train.txt --dev_set datasets\fce_dev_train_bea19_os.txt --model_dir models\finetuned_mix --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models\finetuned_v4 --pretrain model --tune_bert 1 --lr 5e-6 --batch_size 32 --n_epoch 2 --patience 1 --max_len 128 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
+python train.py --train_set datasets\fce_train_train_bea19_os.txt --dev_set datasets\fce_dev_train_bea19_os.txt --model_dir models\finetuned_mix_refined --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models\finetuned_mix --pretrain model --tune_bert 1 --lr 5e-6 --batch_size 32 --n_epoch 1 --patience 1 --max_len 128 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
+
+--------------------- F0.5 TURUN DENGAN CONFIG INI (mungkin karena domain shift) --------------------- 
+python train.py --train_set datasets\agentlans\train_preprocessed_utf8.txt --dev_set datasets\agentlans\val_preprocessed_utf8.txt --model_dir models\finetuned_v5 --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models\finetuned_v4 --pretrain model --tune_bert 1 --lr 1e-5 --batch_size 32 --n_epoch 3 --patience 2 --max_len 64 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
+
+
+python train.py --train_set datasets\agentlans\train_preprocessed_utf8.txt --dev_set datasets\agentlans\val_preprocessed_utf8.txt --model_dir models\full_agentlans --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models --pretrain roberta_1_gectorv2 --tune_bert 1 --lr 5e-6 --batch_size 32 --n_epoch 1 --patience 2 --max_len 128 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
+
+// Coba n_epoch 3 lr 1e-5 (USE THIS)
+python train.py --train_set datasets\agentlans\train_preprocessed_utf8.txt --dev_set datasets\agentlans\val_preprocessed_utf8.txt --model_dir models\full_agentlans --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models --pretrain roberta_1_gectorv2 --tune_bert 1 --lr 1e-5 --batch_size 32 --n_epoch 3 --patience 2 --max_len 128 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
+
+-- FINE-TUNED again with FCE (to prevent further domain shift) --
+python train.py --train_set datasets\mix_clean\fce_train_bea19.train.txt --dev_set datasets\mix_clean\fce_dev_bea19.train.txt --model_dir models\multift_agentlans_fce --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models\full_agentlans --pretrain model --tune_bert 1 --lr 1e-5 --batch_size 32 --n_epoch 3 --patience 2 --max_len 128 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
+
+---------------------  --------------------- 
+
+
+===================== 70% FCE + 30% agentlans dataset (all with targeted oversampling) =====================
+python utils\finetuning\convert_m2_to_sentence.py --m2_path datasets\fce_dev_bea19_os.m2 --out_src datasets\mix_clean\fce_dev_source_bea19_os.txt --out_tgt datasets\fce_dev_target_bea19_os.txt 
+python utils\finetuning\convert_m2_to_sentence.py --m2_path datasets\fce_test_bea19_os.m2 --out_src datasets\mix_clean\fce_test_source_bea19_os.txt --out_tgt datasets\fce_test_target_bea19_os.txt 
+python utils\finetuning\convert_m2_to_sentence.py --m2_path datasets\fce_train_bea19_os.m2 --out_src datasets\mix_clean\fce_train_source_bea19_os.txt --out_tgt datasets\fce_train_target_bea19_os.txt 
+
+
+python utils\finetuning\oversample_by_m2_v2.py --in_m2 datasets\fce_dev_bea19.m2 --out_m2 datasets\mix_clean\fce_dev_bea19_os.m2 --k_verb_tense 4 --k_word_order 5 --k_m_prep 3 --k_r_det 3 --k_r_prep 2 --k_noun_num 2 --k_u_prep 2 --k_m_det 2 --k_verb_sva 2 --k_other 1
+python utils\finetuning\oversample_by_m2_v2.py --in_m2 datasets\fce_test_bea19.m2 --out_m2 datasets\mix_clean\fce_test_bea19_os.m2 --k_verb_tense 4 --k_word_order 5 --k_m_prep 3 --k_r_det 3 --k_r_prep 2 --k_noun_num 2 --k_u_prep 2 --k_m_det 2 --k_verb_sva 2 --k_other 1
+python utils\finetuning\oversample_by_m2_v2.py --in_m2 datasets\fce_train_bea19.m2 --out_m2 datasets\mix_clean\fce_train_bea19_os.m2 --k_verb_tense 4 --k_word_order 5 --k_m_prep 3 --k_r_det 3 --k_r_prep 2 --k_noun_num 2 --k_u_prep 2 --k_m_det 2 --k_verb_sva 2 --k_other 1
+
+python utils\preprocess_data.py -s datasets\fce_dev_source_bea19_os.txt -t datasets\fce_dev_target_bea19_os.txt -o datasets\fce_dev_train_bea19_os.txt
+python utils\preprocess_data.py -s datasets\fce_test_source_bea19_os.txt -t datasets\fce_test_target_bea19_os.txt -o datasets\fce_test_train_bea19_os.txt
+python utils\preprocess_data.py -s datasets\fce_train_source_bea19_os.txt -t datasets\fce_train_target_bea19_os.txt -o datasets\fce_train_train_bea19_os.txt
+
+
+===================== 70% FCE + 30% agentlans dataset (WITHOUT oversampling) =====================
+python utils\finetuning\convert_m2_to_sentence.py --m2_path datasets\mix_clean\fce_dev_bea19.m2 --out_src datasets\mix_clean\fce_dev_bea19.src.txt --out_tgt datasets\mix_clean\fce_dev_bea19.tgt.txt
+python utils\finetuning\convert_m2_to_sentence.py --m2_path datasets\mix_clean\fce_train_bea19.m2 --out_src datasets\mix_clean\fce_train_bea19.src.txt --out_tgt datasets\mix_clean\fce_train_bea19.tgt.txt
+python utils\finetuning\convert_m2_to_sentence.py --m2_path datasets\mix_clean\fce_test_bea19.m2 --out_src datasets\mix_clean\fce_test_bea19.src.txt --out_tgt datasets\mix_clean\fce_test_bea19.tgt.txt
+python utils\finetuning\convert_m2_to_sentence.py --m2_path datasets\mix_clean\mix_fce70_agentlans30.m2 --out_src datasets\mix_clean\mix_fce70_agentlans30.src.txt --out_tgt datasets\mix_clean\mix_fce70_agentlans30.tgt.txt
+
+python utils\preprocess_data.py -s datasets\mix_clean\fce_dev_bea19.src.txt -t datasets\mix_clean\fce_dev_bea19.tgt.txt -o datasets\mix_clean\fce_dev_bea19.train.txt
+python utils\preprocess_data.py -s datasets\mix_clean\fce_train_bea19.src.txt -t datasets\mix_clean\fce_train_bea19.tgt.txt -o datasets\mix_clean\fce_train_bea19.train.txt
+python utils\preprocess_data.py -s datasets\mix_clean\fce_test_bea19.src.txt -t datasets\mix_clean\fce_test_bea19.tgt.txt -o datasets\mix_clean\fce_test_bea19.train.txt
+python utils\preprocess_data.py -s datasets\mix_clean\mix_fce70_agentlans30.src.txt -t datasets\mix_clean\mix_fce70_agentlans30.tgt.txt -o datasets\mix_clean\mix_fce70_agentlans30.train.txt
+
+
+python train.py --train_set datasets\mix_clean\mix_fce70_agentlans30.train.txt --dev_set datasets\mix_clean\fce_dev_bea19.train.txt --model_dir models\baseline_mix --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models --pretrain roberta_1_gectorv2 --tune_bert 1 --lr 5e-6 --batch_size 32 --n_epoch 2 --patience 1 --max_len 128 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
+python train.py --train_set datasets\mix_clean\fce_train_bea19.train.txt --dev_set datasets\mix_clean\fce_dev_bea19.train.txt --model_dir models\baseline_mix_refined --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models\baseline_mix --pretrain model --tune_bert 1 --lr 5e-6 --batch_size 32 --n_epoch 1 --patience 1 --max_len 128 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
+
+python predict.py --model_path models\baseline_mix_refined\model.th --vocab_path models\baseline_mix_refined\vocabulary --input_file test_inputs/bea19-submission.txt --output_file test_outputs\v1_bmr_bea19.txt --additional_confidence 0.18 --min_error_probability 0.48 --special_tokens_fix 1 --iteration_count 4
+python predict.py --model_path models\baseline_mix_refined\model.th --vocab_path models\baseline_mix_refined\vocabulary --input_file test_inputs/bea19-submission.txt --output_file test_outputs\v3_bmr_bea19.txt --additional_confidence 0.17 --min_error_probability 0.47 --special_tokens_fix 1 --iteration_count 4
+
+===================== (USE THIS) =====================
+python predict.py --model_path models\baseline_mix_refined\model.th --vocab_path models\baseline_mix_refined\vocabulary --input_file test_inputs/bea19-submission.txt --output_file test_outputs\v2_bmr_bea19.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
+===========================================================================================================================================================================================
+
+python train.py --train_set datasets\mix_clean\mix_fce70_agentlans30.train.txt --dev_set datasets\mix_clean\fce_dev_bea19.train.txt --model_dir models\finetuned_v7 --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models --pretrain roberta_1_gectorv2 --tune_bert 1 --lr 5e-6 --batch_size 32 --n_epoch 2 --patience 1 --max_len 128 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
+python train.py \
+--train_set datasets\fce_raw.txt \
+--dev_set datasets\fce_dev.txt \
+--model_dir models\pretrained_mix_refined \
+--vocab_path data\output_vocabulary \
+--transformer_model roberta \
+--pretrain_folder models\pretrained_mix \
+--pretrain model \
+--tune_bert 1 \
+--lr 5e-6 \
+--batch_size 32 \
+--n_epoch 1 \
+--patience 1 \
+--max_len 128 \
+--tag_strategy keep_one \
+--skip_correct 0 \
+--skip_complex 0 \
+--special_tokens_fix 1
+
+===================== COBA RUNNING W&I + LOCNESS with base model =====================
+python utils\finetuning\convert_m2_to_sentence.py --m2_path datasets\wi_locness\ABCN.dev.gold.bea19.m2 --out_src datasets\wi_locness\ABCN.dev.gold.bea19.src.txt --out_tgt datasets\wi_locness\ABCN.dev.gold.bea19.tgt.txt 

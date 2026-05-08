@@ -1,18 +1,39 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-import subprocess
 import spacy
-import tempfile
-import os
 from typing import List
+from gector.gec_model import GecBERTModel
 
 app = FastAPI()
 
-MODEL_PATH = r"models/finetuned/finetuned/model.th"
+MODEL_PATH = r"models/baseline_mix_refined/model.th"
 VOCAB_PATH = r"data/output_vocabulary"
+MAX_LEN = 30
+MIN_LEN = 3
+ITERATION_COUNT = 4
+LOWERCASE_TOKENS = 0
+MODEL_NAME = "roberta"
 ADDITIONAL_CONFIDENCE = 0.2
 MIN_ERROR_PROBABILITY = 0.5
 SPECIAL_TOKEN_FIX = 1
+BATCH_SIZE = 32
+
+
+model = GecBERTModel(
+  vocab_path=VOCAB_PATH,
+  model_paths=[MODEL_PATH],
+  max_len=MAX_LEN, min_len=MIN_LEN,
+  iterations=ITERATION_COUNT,
+  min_error_probability=MIN_ERROR_PROBABILITY,
+  lowercase_tokens=LOWERCASE_TOKENS,
+  model_name=MODEL_NAME,
+  special_tokens_fix=SPECIAL_TOKEN_FIX,
+  log=False,
+  confidence=ADDITIONAL_CONFIDENCE,
+  del_confidence=0,
+  is_ensemble=0,
+  weigths=None
+)
 
 class Req(BaseModel):
   sentences: List[str]
@@ -75,53 +96,87 @@ def convert_active_to_passive(doc):
 @app.post("/infer")
 def infer(req: Req):
   try:
+    predictions = []
+    cnt_corrections = 0
+    batch = []
+
+    for sent in req.sentences:
+      batch.append(sent.split())
+      if len(batch) == BATCH_SIZE:
+        preds, cnt = model.handle_batch(batch)
+        predictions.extend(preds)
+        cnt_corrections += cnt
+        batch = []
+    if batch:
+      preds, cnt = model.handle_batch(batch)
+      predictions.extend(preds)
+      cnt_corrections += cnt
+    
+    result_lines = [" ".join(x) for x in predictions]
+    responses = []
+    for sentence in result_lines:
+      nlp = spacy.load("en_core_web_sm")
+      doc = nlp(sentence)
+      
+      is_passive = False
+      for token in doc:
+        if token.dep_ in ["auxpass", "nsubjpass"]:
+          is_passive = True
+          break
+
+      responses.append({
+        "sentence": sentence,
+        "voice_type": "passive" if is_passive else "active"
+      })
+      
     # 1) tulis input sementara
-    with tempfile.TemporaryDirectory() as d:
-      inp = os.path.join(d, "test_input_be.txt")
-      outp = os.path.join(d, "test_output_best.txt")
+    # with tempfile.TemporaryDirectory() as d:
+    #   inp = os.path.join(d, "test_input_be.txt")
+    #   outp = os.path.join(d, "test_output_best.txt")
+      
 
-      with open(inp, "w", encoding="utf-8") as f:
-        for s in req.sentences:
-          f.write(s.strip() + "\n")
+    #   with open(inp, "w", encoding="utf-8") as f:
+    #     for s in req.sentences:
+    #       f.write(s.strip() + "\n")
 
-      # 2) panggil predict.py (repo gector)
-      cmd = [
-        "python", "predict.py",
-        "--model_path", MODEL_PATH,
-        "--vocab_path", VOCAB_PATH,
-        "--input_file", inp,
-        "--output_file", outp,
-        "--additional_confidence", str(ADDITIONAL_CONFIDENCE),
-        "--min_error_probability", str(MIN_ERROR_PROBABILITY),
-        "--special_tokens_fix", str(SPECIAL_TOKEN_FIX),
-        "--iteration_count", str(req.iteration_count),
-      ]
-      p = subprocess.run(cmd, capture_output=True, text=True)
+    #   # 2) panggil predict.py (repo gector)
+    #   cmd = [
+    #     "python", "predict.py",
+    #     "--model_path", MODEL_PATH,
+    #     "--vocab_path", VOCAB_PATH,
+    #     "--input_file", inp,
+    #     "--output_file", outp,
+    #     "--additional_confidence", str(ADDITIONAL_CONFIDENCE),
+    #     "--min_error_probability", str(MIN_ERROR_PROBABILITY),
+    #     "--special_tokens_fix", str(SPECIAL_TOKEN_FIX),
+    #     "--iteration_count", str(req.iteration_count),
+    #   ]
+    #   p = subprocess.run(cmd, capture_output=True, text=True)
 
-      if p.returncode != 0:
-        return {"ok": False, "stderr": p.stderr, "stdout": p.stdout}
+    #   if p.returncode != 0:
+    #     return {"ok": False, "stderr": p.stderr, "stdout": p.stdout}
 
-      # 3) baca output
-      with open(outp, "r", encoding="utf-8") as f:
-        preds = [line.rstrip("\n") for line in f]
+    #   # 3) baca output
+    #   with open(outp, "r", encoding="utf-8") as f:
+    #     preds = [line.rstrip("\n") for line in f]
 
-      predictions = []
-      for sentence in preds:
-        nlp = spacy.load("en_core_web_sm")
-        doc = nlp(sentence)
+    #   predictions = []
+    #   for sentence in preds:
+    #     nlp = spacy.load("en_core_web_sm")
+    #     doc = nlp(sentence)
         
-        is_passive = False
-        for token in doc:
-          is_passive = False
-          print(token.text, token.dep_, token.pos_)
-          if token.dep_ in ["auxpass", "nsubjpass"]:
-            is_passive = True
-            break
+    #     is_passive = False
+    #     for token in doc:
+    #       is_passive = False
+    #       print(token.text, token.dep_, token.pos_)
+    #       if token.dep_ in ["auxpass", "nsubjpass"]:
+    #         is_passive = True
+    #         break
 
-        predictions.append({
-          "sentence": sentence,
-          "voice_type": "passive" if is_passive else "active"
-        })
-    return {"ok": True, "predictions": predictions}
+    #     predictions.append({
+    #       "sentence": sentence,
+    #       "voice_type": "passive" if is_passive else "active"
+    #     })
+    return {"ok": True, "predictions": responses}
   except Exception as e:
     return {"ok": False, "error": str(e)}

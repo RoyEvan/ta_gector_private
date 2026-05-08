@@ -28,7 +28,7 @@ def m2_to_parallel(m2_path: str, out_src: str, out_tgt: str, annotator_id: str =
         s_tokens = None
         edits = []
 
-    for raw in Path(m2_path).read_text(encoding="utf-8").splitlines():
+    for raw in Path(m2_path).read_text(encoding="utf-8", errors="ignore").splitlines():
         line = raw.strip()
         if not line:
             flush()
@@ -63,8 +63,8 @@ def m2_to_parallel(m2_path: str, out_src: str, out_tgt: str, annotator_id: str =
 
     flush()
     
-    Path(out_src).write_text("\n".join(src_lines) + "\n", encoding="utf-8")
-    Path(out_tgt).write_text("\n".join(tgt_lines) + "\n", encoding="utf-8")
+    Path(out_src).write_text("\n".join(src_lines) + "\n", encoding="utf-8", errors="ignore")
+    Path(out_tgt).write_text("\n".join(tgt_lines) + "\n", encoding="utf-8", errors="ignore")
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Category-specific oversampling for GEC")

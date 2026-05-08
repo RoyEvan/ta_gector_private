@@ -1,0 +1,8 @@
+__pycache__/
+models/*
+!models/baseline_mix_refined/
+*.pyc
+datasets/*
+docs/*
+test_inputs/*
+test_outputs/*

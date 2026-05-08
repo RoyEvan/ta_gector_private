@@ -2,6 +2,10 @@ conda activate train_gector37
 d:
 cd Kuliah\Tugas_Akhir\TrialCode\gector_grammarly\gector
 
+python -c "import cython; print(cython.__version__)"
+
+//NOTES: torch==1.9.1
+//NOTES: spacy==2.1.8
 
 torch==1.10.0
 allennlp==0.8.4
@@ -11,6 +15,7 @@ scikit-learn==0.20.0
 sentencepiece==0.1.95
 overrides==4.1.2
 numpy==1.19.5
+cython<3
 
 
 
@@ -25,25 +30,66 @@ numpy==2.4.0
 
 
 -- BEFORE FINE-TUNING --
-python predict.py --model_path models\roberta_1_gectorv2.th --vocab_path data/output_vocabulary --input_file test_input.txt --output_file test_output_old.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 3
+python predict.py --model_path models\roberta_1_gectorv2.th --vocab_path data/output_vocabulary --input_file test_input.txt --output_file test_outputs\test_output_old.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 3
+
+-- BEFORE FINE-TUNING (W&I + LOCNESS) --
+python predict.py --model_path models\roberta_1_gectorv2.th --vocab_path data/output_vocabulary --input_file datasets\wi_locness\ABCN.dev.gold.bea19.src.utf.txt --output_file datasets\wi_locness\test_pred_dev.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 3
+
+-- BEFORE FINE-TUNING (BEA-2019 test) --
+python predict.py --model_path models\roberta_1_gectorv2.th --vocab_path data/output_vocabulary --input_file datasets\wi_locness\bea19.test.txt --output_file datasets\wi_locness\roytherooter_test.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 3
 
 
 -- AFTER FINE-TUNING --
-python predict.py --model_path models\finetuned\finetuned\model.th --vocab_path data/output_vocabulary --input_file test_input.txt --output_file test_output_new.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
+python predict.py --model_path models\finetuned\finetuned\model.th --vocab_path data/output_vocabulary --input_file test_input.txt --output_file test_outputs\test_output_new.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
 
 -- AFTER FINE-TUNING with BETTER OVERSAMPLING --
-python predict.py --model_path models\roberta_1_gectorv2.th --vocab_path data\output_vocabulary --input_file test_input.txt --output_file test_output_old.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 3
-python predict.py --model_path models\finetuned\finetuned\model.th --vocab_path models\finetuned\finetuned\vocabulary --input_file test_input.txt --output_file test_output_new.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
-python predict.py --model_path models\finetuned_v4\model.th --vocab_path models\finetuned_v4\vocabulary --input_file test_input.txt --output_file test_output_betteros.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
-python predict.py --model_path models\finetuned_v3\model.th --vocab_path models\finetuned_v3\vocabulary --input_file test_input.txt --output_file test_output_betteros.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
+python predict.py --model_path models\finetuned\finetuned\model.th --vocab_path models\finetuned\finetuned\vocabulary --input_file test_input.txt --output_file test_outputs\test_output_v2.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
+python predict.py --model_path models\finetuned_v3\model.th --vocab_path models\finetuned_v3\vocabulary --input_file test_input.txt --output_file test_outputs\test_output_v3.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
+python predict.py --model_path models\roberta_1_gectorv2.th --vocab_path data\output_vocabulary --input_file test_input.txt --output_file test_outputs\test_output_v1.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 3
+python predict.py --model_path models\finetuned_v5\model.th --vocab_path models\finetuned_v5\vocabulary --input_file test_input.txt --output_file test_outputs\test_output_v5.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
+python predict.py --model_path models\finetuned_v6\model.th --vocab_path models\finetuned_v6\vocabulary --input_file test_input.txt --output_file test_outputs\test_output_v6.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
+python predict.py --model_path models\finetuned_v7\model.th --vocab_path models\finetuned_v7\vocabulary --input_file test_input.txt --output_file test_outputs\test_output_v7.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
+
+
+python predict.py --model_path models\finetuned_v4\model.th --vocab_path models\finetuned_v4\vocabulary --input_file test_input.txt --output_file test_outputs\test_output_v4.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
+python predict.py --model_path models\finetuned_v4\model.th --vocab_path models\finetuned_v4\vocabulary --input_file test_input.txt --output_file test_outputs\test_output_v4_1.txt --additional_confidence 0.18 --min_error_probability 0.48 --special_tokens_fix 1 --iteration_count 4
+
+python predict.py --model_path models\finetuned_mix\model.th --vocab_path models\finetuned_mix\vocabulary --input_file test_input.txt --output_file test_outputs\test_output_v4_2.txt --additional_confidence 0.18 --min_error_probability 0.48 --special_tokens_fix 1 --iteration_count 4
+python predict.py --model_path models\finetuned_mix_refined\model.th --vocab_path models\finetuned_mix_refined\vocabulary --input_file test_input.txt --output_file test_outputs\test_output_v4_3.txt --additional_confidence 0.18 --min_error_probability 0.48 --special_tokens_fix 1 --iteration_count 4
+
+
+-- FINE-TUNED for BEA-2019 test --
+python predict.py --model_path models\finetuned_v4\model.th --vocab_path models\finetuned_v4\vocabulary --input_file datasets\wi_locness\bea19.test.txt --output_file test_outputs\v4_bea19_test.txt --additional_confidence 0.18 --min_error_probability 0.48 --special_tokens_fix 1 --iteration_count 4
+python predict.py --model_path models\finetuned_mix_refined\model.th --vocab_path models\finetuned_mix_refined\vocabulary --input_file datasets\wi_locness\bea19.test.txt --output_file test_outputs\v4mr_bea19_test.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
+
+
+========================================================================================================================================================================
+-- FINE-TUNED fully with agentlans --
+python predict.py --model_path models\full_agentlans\model.th --vocab_path models\full_agentlans\vocabulary --input_file test_inputs/bea19-submission.txt --output_file test_outputs\output_agentlans_bea19.txt --additional_confidence 0.18 --min_error_probability 0.48 --special_tokens_fix 1 --iteration_count 4
+python predict.py --model_path models\full_agentlans\model.th --vocab_path models\full_agentlans\vocabulary --input_file test_input.txt --output_file test_outputs\output_agentlans_fce.txt --additional_confidence 0.18 --min_error_probability 0.48 --special_tokens_fix 1 --iteration_count 4
+
+-- FINE-TUNED again with FCE (to prevent further domain shift) --
+python predict.py --model_path models\multift_agentlans_fce\model.th --vocab_path models\multift_agentlans_fce\vocabulary --input_file test_inputs/bea19-submission.txt --output_file test_outputs\multift_agentlansfce_bea19.txt --additional_confidence 0.18 --min_error_probability 0.48 --special_tokens_fix 1 --iteration_count 4
+python predict.py --model_path models\multift_agentlans_fce\model.th --vocab_path models\multift_agentlans_fce\vocabulary --input_file test_inputs/bea19-submission.txt --output_file test_outputs\v2_multift_agentlansfce_bea19.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
+python predict.py --model_path models\multift_agentlans_fce\model.th --vocab_path models\multift_agentlans_fce\vocabulary --input_file test_inputs/bea19-submission.txt --output_file test_outputs\v3_multift_agentlansfce_bea19.txt --additional_confidence 0.22 --min_error_probability 0.52 --special_tokens_fix 1 --iteration_count 4
+
+python predict.py --model_path models\multift_agentlans_fce\model.th --vocab_path models\multift_agentlans_fce\vocabulary --input_file test_input.txt --output_file test_outputs\multift_agentlansfce_fce.txt --additional_confidence 0.18 --min_error_probability 0.48 --special_tokens_fix 1 --iteration_count 4
+
+
+
+========================================================================================================================================================================
 
 -- AFTER FINE-TUNING WITH BACKEND --
-python predict.py --model_path models\finetuned\finetuned\model.th --vocab_path data/output_vocabulary --input_file testing_input_be.txt --output_file test_output_be.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 3
+python predict.py --model_path models\finetuned\finetuned\model.th --vocab_path data/output_vocabulary --input_file testing_input_be.txt --output_file test_outputs\test_output_be.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 3
 
 -- AFTER FINE-TUNING (ABSTRACTS) --
-python predict.py --model_path models\finetuned\finetuned\model.th --vocab_path data/output_vocabulary --input_file datasets/ORI_ABSTRACTS.txt --output_file test_abstracts.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
+python predict.py --model_path models\finetuned\finetuned\model.th --vocab_path data/output_vocabulary --input_file datasets/ORI_ABSTRACTS.txt --output_file test_outputs\test_abstracts.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
 
 
+-- TESTING FINE-TUNING 25 Mar 2026 --
+
+
+-------------------------------------
 
 python predict.py --model_path MODEL_PATH [MODEL_PATH ...] \
                   --vocab_path VOCAB_PATH --input_file INPUT_FILE \

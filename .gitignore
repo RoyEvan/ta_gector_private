@@ -136,7 +136,6 @@ dmypy.json
 
 vocab_backup
 fix_vocab.py
-requirements_final.txt
 roberta_1_gectorv2.th
 datasets/*
 models/*
