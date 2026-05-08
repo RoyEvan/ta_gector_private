@@ -18,6 +18,8 @@ COPY requirements_final.txt .
 
 RUN pip install --no-cache-dir --no-build-isolation --no-deps -r requirements_final.txt
 
+RUN pip install google-cloud-storage
+
 RUN python -m spacy download en_core_web_sm
 
 COPY . /app

@@ -138,7 +138,17 @@ vocab_backup
 fix_vocab.py
 roberta_1_gectorv2.th
 datasets/*
-models/*
 test_abstract*
 test_input*
 test_output*
+
+# ignore semua models
+models/*
+
+# allow folder baseline_mix_refined
+!models/baseline_mix_refined/
+models/baseline_mix_refined/*.th
+models/baseline_mix_refined/log/**
+
+# allow isi di dalamnya
+!models/baseline_mix_refined/vocabulary/**

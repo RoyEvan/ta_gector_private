@@ -8,6 +8,7 @@ app = FastAPI()
 
 MODEL_PATH = r"models/baseline_mix_refined/model.th"
 VOCAB_PATH = r"data/output_vocabulary"
+
 MAX_LEN = 30
 MIN_LEN = 3
 ITERATION_COUNT = 4
@@ -92,6 +93,20 @@ def convert_active_to_passive(doc):
     return f"{obj.text.capitalize()} {be_verb} {verb_pp} by {subject.text}."
   
   return None
+
+def download_model():
+  bucket_name = "gector-api-docker-image"
+  source_blob_name = "/model.th"
+  destination_file_name = "/tmp/model.th"
+
+  client = storage.Client()
+  bucket = client.bucket(bucket_name)
+  blob = bucket.blob(source_blob_name)
+
+  blob.download_to_filename(destination_file_name)
+
+  print("Model downloaded to", destination_file_name)
+  return destination_file_name
 
 @app.post("/infer")
 def infer(req: Req):
