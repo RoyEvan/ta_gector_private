@@ -18,7 +18,7 @@ ADDITIONAL_CONFIDENCE = 0.2
 MIN_ERROR_PROBABILITY = 0.5
 SPECIAL_TOKEN_FIX = 1
 BATCH_SIZE = 32
-global_model = None
+model = None
 
 def download_model():
   bucket_name = "gector-api-docker-image"
