@@ -8,6 +8,18 @@ import os
 
 app = FastAPI()
 
+VOCAB_PATH = r"models/baseline_mix_refined/vocabulary"
+MAX_LEN = 30
+MIN_LEN = 3
+ITERATION_COUNT = 4
+LOWERCASE_TOKENS = 0
+MODEL_NAME = "roberta"
+ADDITIONAL_CONFIDENCE = 0.2
+MIN_ERROR_PROBABILITY = 0.5
+SPECIAL_TOKEN_FIX = 1
+BATCH_SIZE = 32
+global_model = None
+
 def download_model():
   bucket_name = "gector-api-docker-image"
   source_blob_name = "gector-model/model.th"
@@ -24,35 +36,26 @@ def download_model():
 
   return destination_file_name
 
-MODEL_PATH = download_model()
-VOCAB_PATH = r"models/baseline_mix_refined/vocabulary"
-
-MAX_LEN = 30
-MIN_LEN = 3
-ITERATION_COUNT = 4
-LOWERCASE_TOKENS = 0
-MODEL_NAME = "roberta"
-ADDITIONAL_CONFIDENCE = 0.2
-MIN_ERROR_PROBABILITY = 0.5
-SPECIAL_TOKEN_FIX = 1
-BATCH_SIZE = 32
-
-
-model = GecBERTModel(
-  vocab_path=VOCAB_PATH,
-  model_paths=[MODEL_PATH],
-  max_len=MAX_LEN, min_len=MIN_LEN,
-  iterations=ITERATION_COUNT,
-  min_error_probability=MIN_ERROR_PROBABILITY,
-  lowercase_tokens=LOWERCASE_TOKENS,
-  model_name=MODEL_NAME,
-  special_tokens_fix=SPECIAL_TOKEN_FIX,
-  log=False,
-  confidence=ADDITIONAL_CONFIDENCE,
-  del_confidence=0,
-  is_ensemble=0,
-  weigths=None
-)
+def get_model():
+  global model
+  if model is None:
+    model_path = download_model()
+    model = GecBERTModel(
+      vocab_path=VOCAB_PATH,
+      model_paths=[model_path],
+      max_len=MAX_LEN, min_len=MIN_LEN,
+      iterations=ITERATION_COUNT,
+      min_error_probability=MIN_ERROR_PROBABILITY,
+      lowercase_tokens=LOWERCASE_TOKENS,
+      model_name=MODEL_NAME,
+      special_tokens_fix=SPECIAL_TOKEN_FIX,
+      log=False,
+      confidence=ADDITIONAL_CONFIDENCE,
+      del_confidence=0,
+      is_ensemble=0,
+      weigths=None
+    )
+  return model
 
 class Req(BaseModel):
   sentences: List[str]
@@ -148,55 +151,7 @@ def infer(req: Req):
         "sentence": sentence,
         "voice_type": "passive" if is_passive else "active"
       })
-      
-    # 1) tulis input sementara
-    # with tempfile.TemporaryDirectory() as d:
-    #   inp = os.path.join(d, "test_input_be.txt")
-    #   outp = os.path.join(d, "test_output_best.txt")
-      
-
-    #   with open(inp, "w", encoding="utf-8") as f:
-    #     for s in req.sentences:
-    #       f.write(s.strip() + "\n")
-
-    #   # 2) panggil predict.py (repo gector)
-    #   cmd = [
-    #     "python", "predict.py",
-    #     "--model_path", MODEL_PATH,
-    #     "--vocab_path", VOCAB_PATH,
-    #     "--input_file", inp,
-    #     "--output_file", outp,
-    #     "--additional_confidence", str(ADDITIONAL_CONFIDENCE),
-    #     "--min_error_probability", str(MIN_ERROR_PROBABILITY),
-    #     "--special_tokens_fix", str(SPECIAL_TOKEN_FIX),
-    #     "--iteration_count", str(req.iteration_count),
-    #   ]
-    #   p = subprocess.run(cmd, capture_output=True, text=True)
-
-    #   if p.returncode != 0:
-    #     return {"ok": False, "stderr": p.stderr, "stdout": p.stdout}
-
-    #   # 3) baca output
-    #   with open(outp, "r", encoding="utf-8") as f:
-    #     preds = [line.rstrip("\n") for line in f]
-
-    #   predictions = []
-    #   for sentence in preds:
-    #     nlp = spacy.load("en_core_web_sm")
-    #     doc = nlp(sentence)
-        
-    #     is_passive = False
-    #     for token in doc:
-    #       is_passive = False
-    #       print(token.text, token.dep_, token.pos_)
-    #       if token.dep_ in ["auxpass", "nsubjpass"]:
-    #         is_passive = True
-    #         break
-
-    #     predictions.append({
-    #       "sentence": sentence,
-    #       "voice_type": "passive" if is_passive else "active"
-    #     })
+    
     return {"ok": True, "predictions": responses}
   except Exception as e:
     return {"ok": False, "error": str(e)}
