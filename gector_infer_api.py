@@ -119,6 +119,7 @@ def convert_active_to_passive(doc):
 @app.post("/infer")
 def infer(req: Req):
   try:
+    model = get_model()
     predictions = []
     cnt_corrections = 0
     batch = []
