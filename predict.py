@@ -29,33 +29,6 @@ def predict_for_file(input_file, output_file, model, batch_size=32, to_normalize
         f.write("\n".join(result_lines) + '\n')
     return cnt_corrections
 
-def predict_for_file2(input_file, output_file, model, batch_size=32, to_normalize=False):
-    test_data = read_lines(input_file)
-    predictions = []
-    cnt_corrections = 0
-    batch = []
-    for sent in test_data:
-        batch.append(sent.split())
-        if len(batch) == batch_size:
-            preds, cnt = model.handle_batch(batch)
-            predictions.extend(preds)
-            cnt_corrections += cnt
-            batch = []
-    if batch:
-        preds, cnt = model.handle_batch(batch)
-        predictions.extend(preds)
-        cnt_corrections += cnt
-
-    result_lines = [" ".join(x) for x in predictions]
-    if to_normalize:
-        result_lines = [normalize(line) for line in result_lines]
-
-    with open(output_file, 'w', encoding="utf-8") as f:
-        f.write("\n".join(result_lines) + '\n')
-    return cnt_corrections
-
-
-
 def main(args):
     # get all paths
     model = GecBERTModel(vocab_path=args.vocab_path,
