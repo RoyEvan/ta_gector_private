@@ -145,10 +145,10 @@ test_output*
 # ignore semua models
 models/*
 
-# allow folder baseline_mix_refined
-!models/baseline_mix_refined/
-models/baseline_mix_refined/*.th
-models/baseline_mix_refined/log/**
+!models/finetuned_v10/
+models/finetuned_v10/*.th
+models/finetuned_v10/*.json
+models/finetuned_v10/log/
 
 # allow isi di dalamnya
 !models/finetuned_v10/vocabulary/**
