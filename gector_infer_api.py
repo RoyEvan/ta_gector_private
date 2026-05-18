@@ -8,10 +8,10 @@ import os
 
 app = FastAPI()
 
-VOCAB_PATH = r"models/baseline_mix_refined/vocabulary"
+VOCAB_PATH = r"models/finetuned_v10/vocabulary"
 MAX_LEN = 30
 MIN_LEN = 3
-ITERATION_COUNT = 4
+ITERATION_COUNT = 5
 LOWERCASE_TOKENS = 0
 MODEL_NAME = "roberta"
 ADDITIONAL_CONFIDENCE = 0.2
@@ -23,7 +23,7 @@ model = None
 def download_model():
   bucket_name = "gector-api-docker-image"
   source_blob_name = "gector-model/model.th"
-  destination_dir = "/tmp/models/baseline_mix_refined"
+  destination_dir = "/tmp/models/finetuned_v10"
   destination_file_name = os.path.join(destination_dir, "model.th")
 
   os.makedirs(destination_dir, exist_ok=True)

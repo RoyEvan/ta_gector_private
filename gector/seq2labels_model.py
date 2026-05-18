@@ -152,8 +152,49 @@ class Seq2Labels(Model):
                        "class_probabilities_d_tags": class_probabilities_d,
                        "max_error_probability": incorr_prob}
         if labels is not None and d_tags is not None:
-            loss_labels = sequence_cross_entropy_with_logits(logits_labels, labels, mask,
-                                                             label_smoothing=self.label_smoothing)
+            # loss_labels = sequence_cross_entropy_with_logits(logits_labels, labels, mask,
+            #                                                  label_smoothing=self.label_smoothing)
+            
+
+            logits_flat = logits_labels.view(-1, logits_labels.size(-1))   # [B*T, C]
+            labels_flat = labels.view(-1)                                  # [B*T]
+            mask_flat = mask.view(-1).float()                              # [B*T]
+            loss_fct = torch.nn.CrossEntropyLoss(reduction='none')
+            losses_flat = loss_fct(logits_flat, labels_flat)              # [B*T]
+            
+            
+            weights_flat = torch.ones_like(losses_flat).to(losses_flat.device)
+            for idx in range(labels_flat.size(0)):
+                if mask_flat[idx] == 0:
+                    continue
+                label_id = labels_flat[idx].item()
+                label = self.vocab.get_token_from_index(label_id, namespace="labels")
+                if label == "$KEEP":
+                    weights_flat[idx] = 0.9
+                elif label.startswith("$TRANSFORM_VERB"):
+                    if "VBZ" in label:
+                        weights_flat[idx] = 1.35
+                    else:
+                        weights_flat[idx] = 1.25
+                elif label.startswith("$TRANSFORM_NOUN"):
+                    weights_flat[idx] = 1.25
+                elif label.startswith("$REPLACE_"):
+                    token = label.replace("$REPLACE_", "")
+                    if token in ["a", "an", "the"]:
+                        weights_flat[idx] = 1.3
+                    elif token in ["in", "on", "at", "for", "to", "with", "of", "by"]:
+                        weights_flat[idx] = 1.15
+                elif label == "$DELETE":
+                    weights_flat[idx] = 1.1
+                elif "MERGE" in label or "SPLIT" in label:
+                    weights_flat[idx] = 1.2
+
+            # normalize
+            weights_flat = weights_flat / weights_flat.mean()
+            weights_flat = torch.clamp(weights_flat, 0.8, 1.4)
+            
+            
+            loss_labels = (losses_flat * weights_flat * mask_flat).sum() / mask_flat.sum()
             loss_d = sequence_cross_entropy_with_logits(logits_d, d_tags, mask)
             for metric in self.metrics.values():
                 metric(logits_labels, labels, mask.float())

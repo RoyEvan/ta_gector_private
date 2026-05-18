@@ -151,4 +151,4 @@ models/baseline_mix_refined/*.th
 models/baseline_mix_refined/log/**
 
 # allow isi di dalamnya
-!models/baseline_mix_refined/vocabulary/**
+!models/finetuned_v10/vocabulary/**

@@ -223,6 +223,28 @@ class GecBERTModel(object):
                 continue
         return final_batch, new_pred_ids, total_updated
 
+    # def get_threshold(self, tokens):
+    #     final_probs = []
+    #     for action in tokens:
+    #         # print(action)
+    #         if action.startswith("$TRANSFORM_VERB"):
+    #             final_probs.append(0.47)  # verb tense & SVA
+    #         elif action.startswith("$REPLACE_"):
+    #             token = action.replace("$REPLACE_", "")
+
+    #             if token in ["a", "an", "the"]:
+    #                 final_probs.append(0.58)  # article
+    #             elif token in ["in", "on", "at", "for", "to", "with", "of", "by"]:
+    #                 final_probs.append(0.6)  # preposition
+    #             else:
+    #                 final_probs.append(0.5)  # general replace
+    #         elif action == "$DELETE":
+    #             final_probs.append(0.55)
+    #         else:
+    #             final_probs.append(0.5)
+
+    #     return final_probs
+
     def postprocess_batch(self, batch, all_probabilities, all_idxs,
                           error_probs):
         all_results = []
@@ -240,6 +262,12 @@ class GecBERTModel(object):
                 continue
 
             # skip whole sentence if probability of correctness is not high
+            # actions = [
+            #     self.vocab.get_token_from_index(idx, namespace='labels') for idx in idxs
+            # ]
+
+            # tweaked_probs = self.get_threshold(actions)
+            # tweaked_probs.append(0)
             if error_prob < self.min_error_probability:
                 all_results.append(tokens)
                 continue
@@ -256,8 +284,30 @@ class GecBERTModel(object):
 
                 sugg_token = self.vocab.get_token_from_index(idxs[i],
                                                              namespace='labels')
-                action = self.get_token_action(token, i, probabilities[i],
-                                               sugg_token)
+                # prob = probabilities[i]
+                # threshold = tweaked_probs[i]
+                # if prob < threshold:
+                #     continue
+                # action = self.get_token_action(token, i, prob, sugg_token)
+                
+                # if(sugg_token == "$DELETE"):
+                #     # print tokens as whole sentence
+                #     print(" ".join(tokens))
+                    
+                #     if probabilities[i] > 0.6:
+                #         print(' DELETE', end=' ')
+                #     else:
+                #         print('   -   ', end=' ')
+                    
+                #     print(f"{i} - Token: {token}, Prob: {probabilities[i]}", end='\n\n')
+
+                # if(sugg_token == "$DELETE" and probabilities[i] < 0.6):
+                #     continue
+                
+                prob = probabilities[i] ** 1.2
+                action = self.get_token_action(token, i, prob, sugg_token)
+                
+                # action = self.get_token_action(token, i, probabilities[i], sugg_token)
                 if not action:
                     continue
 

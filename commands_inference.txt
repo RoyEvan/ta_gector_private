@@ -75,6 +75,22 @@ python predict.py --model_path models\multift_agentlans_fce\model.th --vocab_pat
 
 python predict.py --model_path models\multift_agentlans_fce\model.th --vocab_path models\multift_agentlans_fce\vocabulary --input_file test_input.txt --output_file test_outputs\multift_agentlansfce_fce.txt --additional_confidence 0.18 --min_error_probability 0.48 --special_tokens_fix 1 --iteration_count 4
 
+===========================================================================================================================================================================================
+python predict.py --model_path models\baseline_mix_refined\model.th --vocab_path models\baseline_mix_refined\vocabulary --input_file test_inputs/bea19-submission.txt --output_file test_outputs\v1_bmr_bea19.txt --additional_confidence 0.18 --min_error_probability 0.48 --special_tokens_fix 1 --iteration_count 4
+python predict.py --model_path models\baseline_mix_refined\model.th --vocab_path models\baseline_mix_refined\vocabulary --input_file test_inputs/bea19-submission.txt --output_file test_outputs\v3_bmr_bea19.txt --additional_confidence 0.17 --min_error_probability 0.47 --special_tokens_fix 1 --iteration_count 4
+
+===================== (USE THIS) =====================
+python predict.py --model_path models\baseline_mix_refined\model.th --vocab_path models\baseline_mix_refined\vocabulary --input_file test_inputs/bea19-submission.txt --output_file test_outputs\v2_bmr_bea19.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
+===========================================================================================================================================================================================
+
+===================== (70% WILOCNESS + 30% FCE) =====================
+python predict.py --model_path models\finetuned_v10\model.th --vocab_path models\finetuned_v10\vocabulary --input_file test_inputs\bea19-submission.txt --output_file test_outputs\v1_fv10_bea19.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 5
+===========================================================================================================================================================================================
+
+===================== (ORIGINAL PAPER MODEL) =====================
+python predict.py --model_path models\roberta_1_gectorv2.th --vocab_path data\output_vocabulary --input_file test_inputs\bea19-submission.txt --output_file test_outputs\v1_orig_bea19.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 5
+===========================================================================================================================================================================================
+
 
 
 ========================================================================================================================================================================

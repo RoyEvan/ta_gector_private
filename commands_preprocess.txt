@@ -85,33 +85,20 @@ python utils\preprocess_data.py -s datasets\mix_clean\mix_fce70_agentlans30.src.
 
 python train.py --train_set datasets\mix_clean\mix_fce70_agentlans30.train.txt --dev_set datasets\mix_clean\fce_dev_bea19.train.txt --model_dir models\baseline_mix --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models --pretrain roberta_1_gectorv2 --tune_bert 1 --lr 5e-6 --batch_size 32 --n_epoch 2 --patience 1 --max_len 128 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
 python train.py --train_set datasets\mix_clean\fce_train_bea19.train.txt --dev_set datasets\mix_clean\fce_dev_bea19.train.txt --model_dir models\baseline_mix_refined --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models\baseline_mix --pretrain model --tune_bert 1 --lr 5e-6 --batch_size 32 --n_epoch 1 --patience 1 --max_len 128 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
+===========================================================================================================================================================================================
 
-python predict.py --model_path models\baseline_mix_refined\model.th --vocab_path models\baseline_mix_refined\vocabulary --input_file test_inputs/bea19-submission.txt --output_file test_outputs\v1_bmr_bea19.txt --additional_confidence 0.18 --min_error_probability 0.48 --special_tokens_fix 1 --iteration_count 4
-python predict.py --model_path models\baseline_mix_refined\model.th --vocab_path models\baseline_mix_refined\vocabulary --input_file test_inputs/bea19-submission.txt --output_file test_outputs\v3_bmr_bea19.txt --additional_confidence 0.17 --min_error_probability 0.47 --special_tokens_fix 1 --iteration_count 4
 
-===================== (USE THIS) =====================
-python predict.py --model_path models\baseline_mix_refined\model.th --vocab_path models\baseline_mix_refined\vocabulary --input_file test_inputs/bea19-submission.txt --output_file test_outputs\v2_bmr_bea19.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
+===================== Train Base Model with mixed dataset: WILOCNESS 70% + FCE 30%  =====================
+python utils\finetuning\convert_m2_to_sentence.py --m2_path datasets\mix_clean\mix_wilocness70_fce30.m2 --out_src datasets\mix_clean\mix_wilocness70_fce30.src.txt --out_tgt datasets\mix_clean\mix_wilocness70_fce30.tgt.txt
+python utils\finetuning\convert_m2_to_sentence.py --m2_path datasets\mix_clean\mix_wilocness70_fce30_dev.m2 --out_src datasets\mix_clean\mix_wilocness70_fce30_dev.src.txt --out_tgt datasets\mix_clean\mix_wilocness70_fce30_dev.tgt.txt
+
+python utils\preprocess_data.py -s datasets\mix_clean\mix_wilocness70_fce30.src.txt -t datasets\mix_clean\mix_wilocness70_fce30.tgt.txt -o datasets\mix_clean\mix_wilocness70_fce30.train.txt
+python utils\preprocess_data.py -s datasets\mix_clean\mix_wilocness70_fce30_dev.src.txt -t datasets\mix_clean\mix_wilocness70_fce30_dev.tgt.txt -o datasets\mix_clean\mix_wilocness70_fce30_dev.train.txt
+
+python train.py --train_set datasets\mix_clean\mix_wilocness70_fce30.train.txt --dev_set datasets\mix_clean\mix_wilocness70_fce30_dev.train.txt --model_dir models\finetuned_v8 --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models --pretrain roberta_1_gectorv2 --tune_bert 1 --lr 5e-6 --batch_size 32 --n_epoch 3 --patience 2 --max_len 128 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
 ===========================================================================================================================================================================================
 
 python train.py --train_set datasets\mix_clean\mix_fce70_agentlans30.train.txt --dev_set datasets\mix_clean\fce_dev_bea19.train.txt --model_dir models\finetuned_v7 --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models --pretrain roberta_1_gectorv2 --tune_bert 1 --lr 5e-6 --batch_size 32 --n_epoch 2 --patience 1 --max_len 128 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
-python train.py \
---train_set datasets\fce_raw.txt \
---dev_set datasets\fce_dev.txt \
---model_dir models\pretrained_mix_refined \
---vocab_path data\output_vocabulary \
---transformer_model roberta \
---pretrain_folder models\pretrained_mix \
---pretrain model \
---tune_bert 1 \
---lr 5e-6 \
---batch_size 32 \
---n_epoch 1 \
---patience 1 \
---max_len 128 \
---tag_strategy keep_one \
---skip_correct 0 \
---skip_complex 0 \
---special_tokens_fix 1
 
 ===================== COBA RUNNING W&I + LOCNESS with base model =====================
 python utils\finetuning\convert_m2_to_sentence.py --m2_path datasets\wi_locness\ABCN.dev.gold.bea19.m2 --out_src datasets\wi_locness\ABCN.dev.gold.bea19.src.txt --out_tgt datasets\wi_locness\ABCN.dev.gold.bea19.tgt.txt 
