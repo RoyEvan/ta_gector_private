@@ -304,8 +304,7 @@ class GecBERTModel(object):
                 # if(sugg_token == "$DELETE" and probabilities[i] < 0.6):
                 #     continue
                 
-                prob = probabilities[i] ** 1.2
-                action = self.get_token_action(token, i, prob, sugg_token)
+                action = self.get_token_action(token, i, probabilities[i], sugg_token)
                 
                 # action = self.get_token_action(token, i, probabilities[i], sugg_token)
                 if not action:

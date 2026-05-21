@@ -1,3 +1,7 @@
+conda activate train_gector37
+d:
+cd Kuliah\Tugas_Akhir\TrialCode\gector_grammarly\gector
+
 python utils\finetuning\oversample_by_m2.py --in_m2 datasets\fce_test_bea19.m2 --out_m2 datasets\fce_test_source_bea19.m2 --k_target 2 --k_other 1 --seed 13
 
 python utils\finetuning\convert_m2_to_sentence.py
@@ -102,3 +106,32 @@ python train.py --train_set datasets\mix_clean\mix_fce70_agentlans30.train.txt -
 
 ===================== COBA RUNNING W&I + LOCNESS with base model =====================
 python utils\finetuning\convert_m2_to_sentence.py --m2_path datasets\wi_locness\ABCN.dev.gold.bea19.m2 --out_src datasets\wi_locness\ABCN.dev.gold.bea19.src.txt --out_tgt datasets\wi_locness\ABCN.dev.gold.bea19.tgt.txt 
+
+
+python utils\finetuning\convert_m2_to_sentence.py --m2_path datasets\final_dataset\wifce_alansfiltered.m2 --out_src datasets\final_dataset\wifce_alansfiltered.src.txt --out_tgt datasets\final_dataset\wifce_alansfiltered.tgt.txt
+python utils\finetuning\convert_m2_to_sentence.py --m2_path datasets\final_dataset\wilocness.dev.m2 --out_src datasets\final_dataset\wilocness.dev.src.txt --out_tgt datasets\final_dataset\wilocness.dev.tgt.txt
+python utils\preprocess_data.py -s datasets\final_dataset\wifce_alansfiltered.src.txt -t datasets\final_dataset\wifce_alansfiltered.tgt.txt -o datasets\final_dataset\wifce_alansfiltered.train.txt
+python utils\preprocess_data.py -s datasets\final_dataset\wilocness.dev.src.txt -t datasets\final_dataset\wilocness.dev.tgt.txt -o datasets\final_dataset\wilocness.dev.train.txt
+
+python train.py --train_set datasets/final_dataset/wifce_alansfiltered.train.txt --dev_set datasets/final_dataset/wilocness.dev.train.txt --model_dir models/finetuned_v10_stage2 --vocab_path models/finetuned_v10/vocabulary --transformer_model roberta --pretrain_folder models/finetuned_v10 --pretrain model --tune_bert 1 --lr 2e-6 --batch_size 32 --n_epoch 1 --patience 1 --max_len 128 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
+
+
+===================== COBA TRAINING PAKE BEA19 DEV (W&I+LOCNESS Dev, train with wilocness70_fce30) =====================
+python train.py --train_set datasets\mix_clean\mix_wilocness70_fce30.train.txt --dev_set datasets/final_dataset/wilocness.dev.train.txt --model_dir models/finetuned_v11 --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models --pretrain roberta_1_gectorv2 --tune_bert 1 --lr 5e-6 --batch_size 32 --n_epoch 3 --patience 2 --max_len 128 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
+python predict.py --model_path models\finetuned_v11\model.th --vocab_path models\finetuned_v11\vocabulary --input_file test_inputs\bea19-submission.txt --output_file test_outputs\v1_fv11.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 5
+
+===================== COBA TRAINING PAKE BEA19 DEV (W&I+LOCNESS Dev, train with wilocnessfce70_alansfiltered30) =====================
+python train.py --train_set datasets/final_dataset/wifce_alansfiltered.train.txt --dev_set datasets/final_dataset/wilocness.dev.train.txt --model_dir models/finetuned_v12 --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models --pretrain roberta_1_gectorv2 --tune_bert 1 --lr 5e-6 --batch_size 32 --n_epoch 3 --patience 2 --max_len 128 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
+
+python predict.py --model_path models\finetuned_v12\model.th --vocab_path models\finetuned_v12\vocabulary --input_file test_inputs\bea19-submission.txt --output_file test_outputs\v1_fv12.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 5
+python predict.py --model_path models\finetuned_v12\model.th --vocab_path models\finetuned_v12\vocabulary --input_file test_inputs\bea19-submission.txt --output_file test_outputs\v1_fv12.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 5
+
+
+===================== COBA TRAINING PAKE BEA19 DEV (train with wilfce70_alans30) =====================
+python utils\finetuning\convert_m2_to_sentence.py --m2_path datasets\mix_clean\wilfce70_alans30.m2 --out_src datasets\mix_clean\wilfce70_alans30.src.txt --out_tgt datasets\mix_clean\wilfce70_alans30.tgt.txt
+python utils\preprocess_data.py -s datasets\mix_clean\wilfce70_alans30.src.txt -t datasets\mix_clean\wilfce70_alans30.tgt.txt -o datasets\mix_clean\wilfce70_alans30.train.txt
+
+python train.py --train_set datasets/mix_clean/wilfce70_alans30.train.txt --dev_set datasets/final_dataset/wilocness.dev.train.txt --model_dir models/finetuned_v13 --vocab_path data\output_vocabulary --transformer_model roberta --pretrain_folder models --pretrain roberta_1_gectorv2 --tune_bert 1 --lr 5e-6 --batch_size 32 --n_epoch 3 --patience 2 --max_len 128 --tag_strategy keep_one --skip_correct 0 --skip_complex 0 --special_tokens_fix 1
+python predict.py --model_path models\finetuned_v13\model.th --vocab_path models\finetuned_v13\vocabulary --input_file test_inputs\bea19-submission.txt --output_file test_outputs\v1_0_fv13.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 5
+python predict.py --model_path models\finetuned_v13\model.th --vocab_path models\finetuned_v13\vocabulary --input_file test_inputs\bea19-submission.txt --output_file test_outputs\v1_1_fv13.txt --additional_confidence 0.18 --min_error_probability 0.52 --special_tokens_fix 1 --iteration_count 5
+python predict.py --model_path models\finetuned_v13\model.th --vocab_path models\finetuned_v13\vocabulary --input_file test_inputs\bea19-submission.txt --output_file test_outputs\v1_2_fv13.txt --additional_confidence 0.22 --min_error_probability 0.52 --special_tokens_fix 1 --iteration_count 5

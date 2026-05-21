@@ -170,24 +170,24 @@ class Seq2Labels(Model):
                 label_id = labels_flat[idx].item()
                 label = self.vocab.get_token_from_index(label_id, namespace="labels")
                 if label == "$KEEP":
-                    weights_flat[idx] = 0.9
+                    weights_flat[idx] = 0.95
                 elif label.startswith("$TRANSFORM_VERB"):
                     if "VBZ" in label:
-                        weights_flat[idx] = 1.35
+                        weights_flat[idx] = 1.2
                     else:
-                        weights_flat[idx] = 1.25
+                        weights_flat[idx] = 1.15
                 elif label.startswith("$TRANSFORM_NOUN"):
-                    weights_flat[idx] = 1.25
+                    weights_flat[idx] = 1.15
                 elif label.startswith("$REPLACE_"):
                     token = label.replace("$REPLACE_", "")
                     if token in ["a", "an", "the"]:
-                        weights_flat[idx] = 1.3
-                    elif token in ["in", "on", "at", "for", "to", "with", "of", "by"]:
                         weights_flat[idx] = 1.15
+                    elif token in ["in", "on", "at", "for", "to", "with", "of", "by"]:
+                        weights_flat[idx] = 1.1
                 elif label == "$DELETE":
-                    weights_flat[idx] = 1.1
+                    weights_flat[idx] = 1.05
                 elif "MERGE" in label or "SPLIT" in label:
-                    weights_flat[idx] = 1.2
+                    weights_flat[idx] = 1.1
 
             # normalize
             weights_flat = weights_flat / weights_flat.mean()

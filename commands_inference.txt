@@ -92,6 +92,7 @@ python predict.py --model_path models\roberta_1_gectorv2.th --vocab_path data\ou
 ===========================================================================================================================================================================================
 
 
+python predict.py --model_path models\finetuned_v10_stage2\model.th --vocab_path models\finetuned_v10_stage2\vocabulary --input_file test_inputs\bea19-submission.txt --output_file test_outputs\v1_fv10_s2_bea19.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 5
 
 ========================================================================================================================================================================
 
@@ -100,26 +101,3 @@ python predict.py --model_path models\finetuned\finetuned\model.th --vocab_path 
 
 -- AFTER FINE-TUNING (ABSTRACTS) --
 python predict.py --model_path models\finetuned\finetuned\model.th --vocab_path data/output_vocabulary --input_file datasets/ORI_ABSTRACTS.txt --output_file test_outputs\test_abstracts.txt --additional_confidence 0.2 --min_error_probability 0.5 --special_tokens_fix 1 --iteration_count 4
-
-
--- TESTING FINE-TUNING 25 Mar 2026 --
-
-
--------------------------------------
-
-python predict.py --model_path MODEL_PATH [MODEL_PATH ...] \
-                  --vocab_path VOCAB_PATH --input_file INPUT_FILE \
-                  --output_file OUTPUT_FILE
-
-*tags
-*labels
-
-
-
-wc -l test_input.txt
-wc -l datasets\fce_test_target_bea19_os.txt
-wc -l test_output_280120261329.txt
-
--- TURUNKAN FALSE POSITIVE --
-python predict.py --model_path models\finetuned\finetuned\model.th --vocab_path data/output_vocabulary --input_file test_input.txt --output_file test_output_280120261329.txt --special_tokens_fix 1 --min_error_probability 0.9 --additional_confidence 0.6 --iteration_count 1
-

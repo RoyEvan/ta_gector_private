@@ -145,10 +145,10 @@ test_output*
 # ignore semua models
 models/*
 
-!models/finetuned_v10/
-models/finetuned_v10/*.th
-models/finetuned_v10/*.json
-models/finetuned_v10/log/
+!models/finetuned_v13/
+models/finetuned_v13/*.th
+models/finetuned_v13/*.json
+models/finetuned_v13/log/
 
 # allow isi di dalamnya
-!models/finetuned_v10/vocabulary/**
+!models/finetuned_v13/vocabulary/**
