@@ -23,7 +23,7 @@ model = None
 def download_model():
   bucket_name = "gector-api-docker-image"
   source_blob_name = "gector-model/model.th"
-  destination_dir = "/tmp/models/finetuned_v13"
+  destination_dir = "/tmp/models/finetuned_v10"
   destination_file_name = os.path.join(destination_dir, "model.th")
 
   os.makedirs(destination_dir, exist_ok=True)

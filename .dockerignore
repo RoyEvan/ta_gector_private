@@ -1,6 +1,6 @@
 __pycache__/
 models/*
-!models/finetuned_v13/vocabulary/*
+!models/finetuned_v10/vocabulary/*
 *.pyc
 datasets/*
 docs/*
