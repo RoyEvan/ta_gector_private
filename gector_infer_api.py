@@ -8,7 +8,7 @@ import os
 
 app = FastAPI()
 
-VOCAB_PATH = r"models/finetuned_v13/vocabulary"
+VOCAB_PATH = r"models/finetuned_v10/vocabulary"
 MAX_LEN = 30
 MIN_LEN = 3
 ITERATION_COUNT = 5
