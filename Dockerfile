@@ -24,8 +24,6 @@ ENV HF_HOME=/app/models
 
 RUN python -c "from transformers import AutoModel, AutoTokenizer; AutoModel.from_pretrained('roberta-base'); AutoTokenizer.from_pretrained('roberta-base')"
 
-COPY ./temp_gector /app/models/finetuned_v10
-
 COPY . /app
 
 ENV PYTHONPATH=/app
