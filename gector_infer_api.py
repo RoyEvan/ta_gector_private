@@ -9,6 +9,7 @@ import os
 app = FastAPI()
 
 VOCAB_PATH = r"models/finetuned_v10/vocabulary"
+MODEL_PATH = r"models/finetuned_v10/model.th"
 MAX_LEN = 30
 MIN_LEN = 3
 ITERATION_COUNT = 5
@@ -20,29 +21,30 @@ SPECIAL_TOKEN_FIX = 1
 BATCH_SIZE = 32
 model = None
 
-def download_model():
-  bucket_name = "gector-api-docker-image"
-  source_blob_name = "gector-model/model.th"
-  destination_dir = "/tmp/models/finetuned_v10"
-  destination_file_name = os.path.join(destination_dir, "model.th")
+# def download_model():
+#   bucket_name = "gector-api-docker-image"
+#   source_blob_name = "gector-model/model.th"
+#   destination_dir = "/tmp/models/finetuned_v10"
+#   destination_file_name = os.path.join(destination_dir, "model.th")
 
-  os.makedirs(destination_dir, exist_ok=True)
+#   os.makedirs(destination_dir, exist_ok=True)
 
-  client = storage.Client()
-  bucket = client.bucket(bucket_name)
-  blob = bucket.blob(source_blob_name)
+#   # client = storage.Client()
+#   client = storage.Client.from_service_account_json("gec-tagging-a181abe692f1.json")
+#   bucket = client.bucket(bucket_name)
+#   blob = bucket.blob(source_blob_name)
 
-  blob.download_to_filename(destination_file_name)
+#   blob.download_to_filename(destination_file_name)
 
-  return destination_file_name
+#   return destination_file_name
 
 def get_model():
   global model
   if model is None:
-    model_path = download_model()
+    # model_path = download_model()
     model = GecBERTModel(
       vocab_path=VOCAB_PATH,
-      model_paths=[model_path],
+      model_paths=[MODEL_PATH],
       max_len=MAX_LEN, min_len=MIN_LEN,
       iterations=ITERATION_COUNT,
       min_error_probability=MIN_ERROR_PROBABILITY,

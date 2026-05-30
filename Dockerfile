@@ -12,8 +12,6 @@ RUN apt-get update && apt-get install -y \
 
 RUN pip install "setuptools<60" "Cython<3"
 
-RUN pip install "Cython<3"
-
 COPY requirements_final.txt .
 
 RUN pip install --no-cache-dir --no-build-isolation --no-deps -r requirements_final.txt
@@ -21,6 +19,12 @@ RUN pip install --no-cache-dir --no-build-isolation --no-deps -r requirements_fi
 RUN pip install google-cloud-storage
 
 RUN python -m spacy download en_core_web_sm
+
+ENV HF_HOME=/app/models
+
+RUN python -c "from transformers import AutoModel, AutoTokenizer; AutoModel.from_pretrained('roberta-base'); AutoTokenizer.from_pretrained('roberta-base')"
+
+COPY ./app/model_gector_temp /app/models/finetuned_v10
 
 COPY . /app
 
